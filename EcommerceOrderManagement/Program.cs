@@ -368,7 +368,7 @@ namespace Ecommerce
 
                         if (!userService.Validate(userName, userPassword))
                         {
-                            Console.WriteLine("Login Unsuccessful, Try again");
+                            Console.WriteLine("Login Unsuccessful,Please Try again");
                             return;
                         }
 
