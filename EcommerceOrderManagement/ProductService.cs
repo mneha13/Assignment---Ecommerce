@@ -12,12 +12,13 @@ namespace Ecommerce.Services.ProductServices
     public class ProductService
     {
         private readonly Repository<Product> _productRepository;
-        public static List<string> ProductCategories = new List<string> { "Electronics", "Food", "Health", "Sports", "Fashion", "Games", "Books", "Office Supplies" };
+        public static List<string>? ProductCategories;
         public const string quit = "quit";
-        
+
         public ProductService(Repository<Product> productRepository, Microsoft.Extensions.DependencyInjection.ServiceProvider serviceProvider)
         {
             _productRepository = productRepository;
+            ProductCategories = CategoryManager.GetCategoriesFromFile();
         }
 
         public void Add(ref int productIdCounter, ServiceProvider serviceProvider)
@@ -30,7 +31,7 @@ namespace Ecommerce.Services.ProductServices
                 System.Console.WriteLine("Product added successfully");
             }
         }
-        public Product GetValidProduct(ref int productIdCounter,Product product)
+        public Product? GetValidProduct(ref int productIdCounter, Product product)
         {
             string prodName, prodDesc, prodCat;
             prodName = GetProductName();
@@ -66,7 +67,7 @@ namespace Ecommerce.Services.ProductServices
             product.ProductDescription = prodDesc;
             product.ProductCategory = prodCat;
             product.ProductQuantity = prodQty;
-            return product; 
+            return product;
         }
 
         public IEnumerable<Product> GetAllProducts()
@@ -78,7 +79,7 @@ namespace Ecommerce.Services.ProductServices
             return _productRepository.Any(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public int IsValidUserChoice(int startRange , int endRange)
+        public int IsValidUserChoice(int startRange, int endRange)
         {
             bool isValidInput = false, isValidRange = false;
             string userChoice = "";
@@ -102,7 +103,7 @@ namespace Ecommerce.Services.ProductServices
         public void DeleteProduct()
         {
             var products = _productRepository.GetAll().ToList();
-            if(products.Count == 0)
+            if (products.Count == 0)
             {
                 System.Console.WriteLine("No Products present to be deleted");
                 return;
@@ -110,23 +111,27 @@ namespace Ecommerce.Services.ProductServices
             int index = 0;
             foreach (var item in products)
             {
-               System.Console.WriteLine($"{index} : {item.ProductName}");
-               index++;
+                System.Console.WriteLine($"{index} : {item.ProductName}");
+                index++;
             }
             System.Console.WriteLine($"{products.Count()} : To Go Back (Exit)");
             int choice = IsValidUserChoice(0, products.Count());
             string name;
-            if(choice == products.Count())
+            if (choice == products.Count())
             {
                 return;//if user chooses to go back
             }
             Product productToDelete = _productRepository.Find(p => p.ProductID == products[choice].ProductID);
             if (productToDelete != null)
             {
-               name = productToDelete.ProductName;
-               _productRepository.Remove(productToDelete);
-               System.Console.WriteLine($"{name} Product deleted");
-            }        
+                name = productToDelete.ProductName;
+                _productRepository.Remove(productToDelete);
+                System.Console.WriteLine($"{name} Product deleted");
+            }
+            else
+            {
+                System.Console.WriteLine("Invalid product selection.");
+            }
         }
 
         public int GetQuantity(string name)
@@ -135,7 +140,7 @@ namespace Ecommerce.Services.ProductServices
             return prod.ProductQuantity;
         }
 
-        public void SetQuantity(string name,int qty)
+        public void SetQuantity(string name, int qty)
         {
             Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
             prod.ProductQuantity = prod.ProductQuantity - qty;
@@ -152,10 +157,10 @@ namespace Ecommerce.Services.ProductServices
                 }
                 var products = _productRepository.GetAll().ToList();
                 int index = 0;
-                foreach(var product in products)
+                foreach (var product in products)
                 {
-                   System.Console.WriteLine($"{index} : {product.ProductName} , quantity in stock {product.ProductQuantity}");
-                   index++;
+                    System.Console.WriteLine($"{index} : {product.ProductName} , quantity in stock {product.ProductQuantity}");
+                    index++;
                 }
                 System.Console.WriteLine($"{products.Count} : To Go Back (Exit)");
                 int choice = IsValidUserChoice(0, products.Count());
@@ -167,23 +172,23 @@ namespace Ecommerce.Services.ProductServices
                 Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
                 if (prod != null)
                 {
-                     String quantity = "";
-                     bool isValidInput = false;
-                     while (!isValidInput)
-                     {
-                         System.Console.WriteLine("Enter quantity to be added");
+                    String quantity = "";
+                    bool isValidInput = false;
+                    while (!isValidInput)
+                    {
+                        System.Console.WriteLine("Enter quantity to be added");
                         quantity = System.Console.ReadLine();
-                         isValidInput = int.TryParse(quantity, out _);
-                         if (!isValidInput)
-                         {
-                              System.Console.WriteLine("Invalid quantity. Please try again.");
-                         }
-                     }
-                     prod.ProductQuantity += System.Convert.ToInt32(quantity);
-                     if (System.Convert.ToInt32(quantity) > 0)
-                     {
-                          System.Console.WriteLine("Quantity updated");
-                     }
+                        isValidInput = int.TryParse(quantity, out _);
+                        if (!isValidInput)
+                        {
+                            System.Console.WriteLine("Invalid quantity. Please try again.");
+                        }
+                    }
+                    prod.ProductQuantity += System.Convert.ToInt32(quantity);
+                    if (System.Convert.ToInt32(quantity) > 0)
+                    {
+                        System.Console.WriteLine("Quantity updated");
+                    }
                 }
             }
             catch (Exception ex)
@@ -210,7 +215,7 @@ namespace Ecommerce.Services.ProductServices
                     index++;
                 }
                 System.Console.WriteLine($"{products.Count} : To Go Back (Exit)");
-                int choice = IsValidUserChoice(0,products.Count());
+                int choice = IsValidUserChoice(0, products.Count());
                 if (choice == products.Count()) { return; }
                 String name = products[choice].ProductName;
                 Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -231,7 +236,7 @@ namespace Ecommerce.Services.ProductServices
                     prod.ProductPrice = System.Convert.ToInt32(price);
                     System.Console.WriteLine($"Price updated for {prod.ProductName}");
                 }
-             }
+            }
             catch (Exception ex)
             {
                 System.Console.WriteLine(ex.Message);
@@ -255,17 +260,17 @@ namespace Ecommerce.Services.ProductServices
                 index++;
             }
             System.Console.WriteLine($"{uniqueCategories.Count()} : To Go Back (Exit)");
-            int choice = IsValidUserChoice(0,uniqueCategories.Count());
-            if (choice == uniqueCategories.Count()) { return;  }
+            int choice = IsValidUserChoice(0, uniqueCategories.Count());
+            if (choice == uniqueCategories.Count()) { return; }
             string prodCategory = uniqueCategories[choice];
             IEnumerable<Product> filteredProducts = new List<Product>();
-            filteredProducts = _productRepository.GetAll().Where(p => p.ProductCategory.Contains(prodCategory));
+            filteredProducts = products.Where(p => p.ProductCategory.Contains(prodCategory));
             if (filteredProducts.Count() == 0)
             {
                 System.Console.WriteLine("There are no products in this category");
                 return;
             }
-             PaginatedData.Paginate(filteredProducts.ToList(), 3);                
+            PaginatedData.Paginate(filteredProducts.ToList());
         }
 
         public void DisplayAllProducts()
@@ -287,25 +292,22 @@ namespace Ecommerce.Services.ProductServices
             switch (choice)
             {
                 case 1:
-                    var categorizedProducts = products.GroupBy(p => p.ProductCategory);
-                    var allcategoryproducts = new List<Product>();
-                    foreach (var group in categorizedProducts)
-                    {
-                        var allProducts = group.ToList();
-                        allcategoryproducts.AddRange(allProducts);
-                    }
-                    PaginatedData.Paginate(allcategoryproducts, 2);
+                    var allcategoryproducts = products
+                    .GroupBy(p => p.ProductCategory) 
+                    .SelectMany(group => group)     
+                    .ToList();
+                    PaginatedData.Paginate(allcategoryproducts);
                     break;
                 case 2:
-                    var sortedProducts = products.OrderBy(p => p.ProductPrice);
-                    PaginatedData.Paginate(sortedProducts.ToList(), 2);
+                    var sortedProducts = products.OrderBy(p => p.ProductPrice).ToList();
+                    PaginatedData.Paginate(sortedProducts);
                     break;
                 case 3:
-                    var sortedDescProducts = products.OrderByDescending(p => p.ProductPrice);
-                    PaginatedData.Paginate(sortedDescProducts.ToList(), 2);
+                    var sortedDescProducts = products.OrderByDescending(p => p.ProductPrice).ToList();
+                    PaginatedData.Paginate(sortedDescProducts);
                     break;
                 case 4:
-                    PaginatedData.Paginate(products.ToList(), 2);
+                    PaginatedData.Paginate(products.ToList());
                     break;
                 case 5: return;
             }
@@ -313,15 +315,15 @@ namespace Ecommerce.Services.ProductServices
 
         public string GetProductNameById(int id)
         {
-            Product product = _productRepository.Find(p=>p.ProductID == id);
-            if(product != null)
+            Product product = _productRepository.Find(p => p.ProductID == id);
+            if (product != null)
             {
                 return product.ProductName;
             }
             return null;
         }
 
-        public int GetOrderAmount(int qty , string name)
+        public int GetOrderAmount(int qty, string name)
         {
             Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
             int total = (int)(prod.ProductPrice * qty);
@@ -329,16 +331,16 @@ namespace Ecommerce.Services.ProductServices
         }
 
         //To update quantity of product if user cancels order
-        public void UpdateProductQty(int qty , string name)
+        public void UpdateProductQty(int qty, string name)
         {
             Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
             prod.ProductQuantity += qty;
         }
 
 
-        public  string GetProductName()
+        public string GetProductName()
         {
-            String prodName="";
+            String prodName = "";
             System.Console.WriteLine("Enter product name: ");
             prodName = System.Console.ReadLine();
             while (string.IsNullOrWhiteSpace(prodName) || HasProduct(prodName))
@@ -362,28 +364,28 @@ namespace Ecommerce.Services.ProductServices
         }
         public int GetProductPrice()
         {
-                String price = "";
-                bool isValidInput = false;
-                System.Console.WriteLine("Enter product price: ");
-                while (!isValidInput)
+            String price = "";
+            bool isValidInput = false;
+            System.Console.WriteLine("Enter product price: ");
+            while (!isValidInput)
+            {
+                price = System.Console.ReadLine();
+                if (!price.Equals(quit, StringComparison.OrdinalIgnoreCase))
                 {
-                    price = System.Console.ReadLine();
-                    if (!price.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                    isValidInput = int.TryParse(price, out _);
+                    if (!isValidInput)
                     {
-                        isValidInput = int.TryParse(price, out _);
-                        if (!isValidInput)
-                        {
-                            Console.WriteLine("Invalid price input. Please try again.");
-                        }
-                    }
-                    if (price.Equals(quit, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return GetQuitValue();
+                        Console.WriteLine("Invalid price input. Please try again.");
                     }
                 }
-                return System.Convert.ToInt32(price);
+                if (price.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                {
+                    return GetQuitValue();
+                }
+            }
+            return System.Convert.ToInt32(price);
         }
-        public  string GetProductDesc()
+        public string GetProductDesc()
         {
             string prodDesc = "";
             System.Console.WriteLine("Enter product description: ");
@@ -397,9 +399,9 @@ namespace Ecommerce.Services.ProductServices
             {
                 return null;
             }
-             return prodDesc;
+            return prodDesc;
         }
-        public  int GetProductQty()
+        public int GetProductQty()
         {
             String quantity = "";
             bool isValidQty = false;
@@ -475,6 +477,7 @@ namespace Ecommerce.Services.ProductServices
                 }
 
                 ProductCategories.Add(name);
+                CategoryManager.SaveCategoriesToFile(ProductCategories);
                 return name;
             }
         }

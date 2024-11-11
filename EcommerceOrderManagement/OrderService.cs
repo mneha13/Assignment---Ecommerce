@@ -72,11 +72,11 @@ namespace Ecommerce.Services.OrderServices
                     var orderList = group.ToList();
                     allcategorizedOrder.AddRange(orderList);
                }
-               PaginatedData.Paginate(allcategorizedOrder, 3);
+               PaginatedData.Paginate(allcategorizedOrder);
            }
            else
            {
-               PaginatedData.Paginate(_orderRepository.GetAll().ToList(), 2);
+               PaginatedData.Paginate(_orderRepository.GetAll().ToList());
            }
         }
 
@@ -309,14 +309,14 @@ namespace Ecommerce.Services.OrderServices
                 { 
                     case 1:
                         var orderedOrders = orders.OrderBy(order => order.Status);
-                        PaginatedData.Paginate(orderedOrders.ToList(), 2);
+                        PaginatedData.Paginate(orderedOrders.ToList());
                         break;
                     case 2:
                         var orderedOrdersByName = orders.OrderBy(order => order.ProductName);
-                        PaginatedData.Paginate(orderedOrdersByName.ToList(), 2);
+                        PaginatedData.Paginate(orderedOrdersByName.ToList());
                         break;
                     case 3:
-                        PaginatedData.Paginate(orders.ToList(), 2);
+                        PaginatedData.Paginate(orders.ToList());
                         break;
                     case 4:
                         return;
@@ -334,7 +334,7 @@ namespace Ecommerce.Services.OrderServices
             var orderedOrders = orders.OrderBy(order => order.Status);
             if (orderedOrders.Count() > 0)
             {
-                PaginatedData.Paginate(orderedOrders.ToList(), 3);
+                PaginatedData.Paginate(orderedOrders.ToList());
             }
             else
             {
@@ -348,7 +348,7 @@ namespace Ecommerce.Services.OrderServices
             var orderedOrders = orders.OrderBy(order => order.OrderedAt);
             if (orderedOrders.Count() > 0)
             {
-                PaginatedData.Paginate(orderedOrders.ToList(), 3);
+                PaginatedData.Paginate(orderedOrders.ToList());
             }
             else
             {

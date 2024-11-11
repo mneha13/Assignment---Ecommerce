@@ -50,9 +50,9 @@ namespace Ecommerce
             {
                 Console.WriteLine("Ecommerce Order Management System");
                 var dbConnection = DatabaseConnection.Instance;
-                var productRepository = dbConnection.GetRepository<Product>();
-                var orderRepository = dbConnection.GetRepository<Order>();
-                var userRepository = dbConnection.GetRepository<User>();
+                var productRepository = dbConnection.GetRepository<Product>("products.json");
+                var orderRepository = dbConnection.GetRepository<Order>("orders.json");
+                var userRepository = dbConnection.GetRepository<User>("users.json");
                 var serviceProvider = new ServiceCollection()
                     .AddTransient<Product>()
                     .BuildServiceProvider();
@@ -128,6 +128,9 @@ namespace Ecommerce
                         {
                             Logger.LogException(ex);
                         }
+                        orderRepository.SaveDataToFile();
+                        productRepository.SaveDataToFile();
+                        userRepository.SaveDataToFile();
                         switch (choice)
                         {
                             case 1:
@@ -194,6 +197,9 @@ namespace Ecommerce
                 {
                     while (true)
                     {
+                        orderRepository.SaveDataToFile();
+                        productRepository.SaveDataToFile();
+                        userRepository.SaveDataToFile();
                         int choice = -1;
                         System.Console.WriteLine("""
                                     Please enter choice:

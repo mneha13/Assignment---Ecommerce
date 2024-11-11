@@ -28,12 +28,12 @@ namespace Ecommerce
             }
         }
 
-        public Repository<T> GetRepository<T>() where T : class
+        public Repository<T> GetRepository<T>(string filePath) where T : class
         {
             var type = typeof(T);
             if (!_repositories.ContainsKey(type))
             {
-                var repositoryInstance = new Repository<T>();
+                var repositoryInstance = new Repository<T>(filePath);
                 _repositories[type] = repositoryInstance;
             }
             return (Repository<T>)_repositories[type];

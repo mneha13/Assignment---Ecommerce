@@ -10,8 +10,19 @@ namespace Ecommerce
 {
     public class PaginatedData
     {
-        public static void Paginate<T>(List<T> items, int pageSize)
+        public static int GetPageSize()
         {
+            int defaultPageSize = 3;  // Default value
+            return defaultPageSize;
+        }
+        public static void Paginate<T>(List<T> items)
+        {
+            int pageSize = GetPageSize();
+            if (pageSize <= 0)
+            {
+                Console.WriteLine("Page size must be greater than zero.");
+                return;
+            }
             int totalPages = (int)Math.Ceiling((double)items.Count / pageSize);
             int currentPage = 1;
 
@@ -22,17 +33,16 @@ namespace Ecommerce
                 DisplayPage(items, currentPage, pageSize);
                 System.Console.WriteLine("\nNavigation: (N)ext, (P)revious, (E)xit");
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.E)
+                switch (key)
                 {
-                    break;
-                }
-                if (key == ConsoleKey.N && currentPage < totalPages)
-                {
-                    currentPage++;
-                }
-                if (key == ConsoleKey.P && currentPage > 1)
-                {
-                    currentPage--;
+                    case ConsoleKey.E:
+                        return;
+                    case ConsoleKey.N when currentPage < totalPages:
+                        currentPage++;
+                        break;
+                    case ConsoleKey.P when currentPage > 1:
+                        currentPage--;
+                        break;
                 }
             }
         }
@@ -41,9 +51,14 @@ namespace Ecommerce
         {
             int start = (currentPage - 1) * pageSize;
             int end = Math.Min(start + pageSize, items.Count);
-            for (int index = start; index < end; index++)
+            if (start >= items.Count || currentPage <= 0 || pageSize <= 0)
             {
-                switch (items[index])
+                Console.WriteLine("Invalid page or page size.");
+                return;
+            }
+            for (int i = start; i < end; i++)
+            {
+                switch (items[i])
                 {
                     case Product product:
                         product.DisplayProductInfo(product);
