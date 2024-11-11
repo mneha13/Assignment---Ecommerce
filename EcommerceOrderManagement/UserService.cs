@@ -192,8 +192,11 @@ namespace Ecommerce.Services.UserServices
                 if (newUserEmail == null) return;
                 int newUserId = UserIdCounter++;
                 User newUser = userFactory.GetUser(newUserRole, newUserName, newUserId, newUserEmail, newUserPassword);
-                Add(newUser);
-                System.Console.WriteLine("New user registeration completed");
+                if (newUser != null)
+                {
+                    Add(newUser);
+                    System.Console.WriteLine("New user registeration completed");
+                }   
             }
             catch (Exception ex)
             {

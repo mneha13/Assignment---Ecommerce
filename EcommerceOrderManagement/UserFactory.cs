@@ -11,34 +11,28 @@ namespace Ecommerce
 {
     public  class UserFactory
     {
-        public const string customer = "Customer";
-        public const string admin = "Admin";
-        public User GetUser(String role , String name , int id,String email,String password)
+        public const string customer = "customer";
+        public const string admin = "admin";
+        public User? GetUser(String role , String name , int id,String email,String password)
         {
-            
-            if (role.Equals(customer, StringComparison.OrdinalIgnoreCase))
+            var normalizedRole = role?.Trim().ToLower();
+            return normalizedRole switch
             {
-                return new Customer() {
-                    UserId = id,
-                    UserName = name,
-                    UserEmail = email,
-                    UserPassword = password,
-                    UserRole = Role.CUSTOMER
-                };   
-            }
-
-            if(role.Equals(admin, StringComparison.OrdinalIgnoreCase))
+                customer => CreateUser<Customer>(id, name, email, password, Role.CUSTOMER),
+                admin => CreateUser<Admin>(id, name, email, password, Role.ADMIN),
+                _ => null,
+            };
+        }
+        public T CreateUser<T>(int id, string name, string email, string password, Role role) where T : User, new()
+        {
+            return new T
             {
-                return new Customer()
-                {
-                    UserId = id,
-                    UserName = name,
-                    UserEmail = email,
-                    UserPassword = password,
-                    UserRole = Role.ADMIN
-                };
-            }
-            return null;
+                UserId = id,
+                UserName = name,
+                UserEmail = email,
+                UserPassword = password,
+                UserRole = role
+            };
         }
     }
 }
