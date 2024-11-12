@@ -13,12 +13,12 @@ namespace Ecommerce.Services.ProductServices
     {
         private readonly Repository<Product> _productRepository;
         public static List<string>? ProductCategories;
-        public const string quit = "quit";
 
-        public ProductService(Repository<Product> productRepository, Microsoft.Extensions.DependencyInjection.ServiceProvider serviceProvider)
+        public ProductService(Repository<Product> productRepository, Microsoft.Extensions.DependencyInjection.ServiceProvider serviceProvider,ref int productIdCounter)
         {
             _productRepository = productRepository;
             ProductCategories = CategoryManager.GetCategoriesFromFile();
+            productIdCounter = productRepository.CountItems() + 1;
         }
 
         public void Add(ref int productIdCounter, ServiceProvider serviceProvider)
@@ -40,7 +40,7 @@ namespace Ecommerce.Services.ProductServices
                 return null;
             }
             int prodPrice = GetProductPrice();
-            if (prodPrice == GetQuitValue())
+            if (prodPrice == StaticData.quitValue)
             {
                 return null;
             }
@@ -51,12 +51,12 @@ namespace Ecommerce.Services.ProductServices
             }
             System.Console.WriteLine("Select category choice");
             prodCat = GetProductCategories();
-            if (prodCat == quit)
+            if (prodCat == StaticData.quit)
             {
                 return null;
             }
             int prodQty = GetProductQty();
-            if (prodQty == GetQuitValue())
+            if (prodQty == StaticData.quitValue)
             {
                 return null;
             }
@@ -79,27 +79,6 @@ namespace Ecommerce.Services.ProductServices
             return _productRepository.Any(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public int IsValidUserChoice(int startRange, int endRange)
-        {
-            bool isValidInput = false, isValidRange = false;
-            string userChoice = "";
-            while (!isValidInput || !isValidRange)
-            {
-                System.Console.WriteLine("Enter  choice");
-                userChoice = System.Console.ReadLine();
-                isValidInput = int.TryParse(userChoice, out _);
-                if (isValidInput)
-                {
-                    isValidRange = System.Convert.ToInt32(userChoice) >= startRange && System.Convert.ToInt32(userChoice) <= endRange;
-                }
-                if (!isValidInput || !isValidRange)
-                {
-                    Console.WriteLine("Invalid choice input. Please try again.");
-                }
-            }
-            return System.Convert.ToInt32(userChoice);
-        }
-
         public void DeleteProduct()
         {
             var products = _productRepository.GetAll().ToList();
@@ -115,8 +94,7 @@ namespace Ecommerce.Services.ProductServices
                 index++;
             }
             System.Console.WriteLine($"{products.Count()} : To Go Back (Exit)");
-            int choice = IsValidUserChoice(0, products.Count());
-            string name;
+            int choice = StaticData.IsValidUserChoice(0, products.Count());
             if (choice == products.Count())
             {
                 return;//if user chooses to go back
@@ -124,9 +102,8 @@ namespace Ecommerce.Services.ProductServices
             Product productToDelete = _productRepository.Find(p => p.ProductID == products[choice].ProductID);
             if (productToDelete != null)
             {
-                name = productToDelete.ProductName;
                 _productRepository.Remove(productToDelete);
-                System.Console.WriteLine($"{name} Product deleted");
+                System.Console.WriteLine($"{productToDelete.ProductName} Product deleted");
             }
             else
             {
@@ -163,7 +140,7 @@ namespace Ecommerce.Services.ProductServices
                     index++;
                 }
                 System.Console.WriteLine($"{products.Count} : To Go Back (Exit)");
-                int choice = IsValidUserChoice(0, products.Count());
+                int choice = StaticData.IsValidUserChoice(0, products.Count());
                 if (choice == products.Count())
                 {
                     return;  // if user chooses to exit
@@ -215,7 +192,7 @@ namespace Ecommerce.Services.ProductServices
                     index++;
                 }
                 System.Console.WriteLine($"{products.Count} : To Go Back (Exit)");
-                int choice = IsValidUserChoice(0, products.Count());
+                int choice = StaticData.IsValidUserChoice(0, products.Count());
                 if (choice == products.Count()) { return; }
                 String name = products[choice].ProductName;
                 Product prod = _productRepository.Find(p => p.ProductName.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -260,7 +237,7 @@ namespace Ecommerce.Services.ProductServices
                 index++;
             }
             System.Console.WriteLine($"{uniqueCategories.Count()} : To Go Back (Exit)");
-            int choice = IsValidUserChoice(0, uniqueCategories.Count());
+            int choice = StaticData.IsValidUserChoice(0, uniqueCategories.Count());
             if (choice == uniqueCategories.Count()) { return; }
             string prodCategory = uniqueCategories[choice];
             IEnumerable<Product> filteredProducts = new List<Product>();
@@ -288,7 +265,7 @@ namespace Ecommerce.Services.ProductServices
                 4 : View all
                 5 : Exit
             """);
-            int choice = IsValidUserChoice(0, 5);
+            int choice = StaticData.IsValidUserChoice(0, 5);
             switch (choice)
             {
                 case 1:
@@ -313,14 +290,9 @@ namespace Ecommerce.Services.ProductServices
             }
         }
 
-        public string GetProductNameById(int id)
+        public string? GetProductNameById(int id)
         {
-            Product product = _productRepository.Find(p => p.ProductID == id);
-            if (product != null)
-            {
-                return product.ProductName;
-            }
-            return null;
+            return _productRepository.Find(p => p.ProductID == id)?.ProductName;
         }
 
         public int GetOrderAmount(int qty, string name)
@@ -356,7 +328,7 @@ namespace Ecommerce.Services.ProductServices
                     prodName = System.Console.ReadLine();
                 }
             }
-            if (prodName.Equals(quit, StringComparison.OrdinalIgnoreCase))
+            if (prodName.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -370,7 +342,7 @@ namespace Ecommerce.Services.ProductServices
             while (!isValidInput)
             {
                 price = System.Console.ReadLine();
-                if (!price.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                if (!price.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                 {
                     isValidInput = int.TryParse(price, out _);
                     if (!isValidInput)
@@ -378,9 +350,9 @@ namespace Ecommerce.Services.ProductServices
                         Console.WriteLine("Invalid price input. Please try again.");
                     }
                 }
-                if (price.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                if (price.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                 {
-                    return GetQuitValue();
+                    return StaticData.quitValue;
                 }
             }
             return System.Convert.ToInt32(price);
@@ -395,7 +367,7 @@ namespace Ecommerce.Services.ProductServices
                 System.Console.WriteLine("Product description cannot be null or empty , Please enter again");
                 prodDesc = System.Console.ReadLine();
             }
-            if (prodDesc.Equals(quit, StringComparison.OrdinalIgnoreCase))
+            if (prodDesc.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -409,17 +381,17 @@ namespace Ecommerce.Services.ProductServices
             {
                 System.Console.WriteLine("Enter product quantity: ");
                 quantity = System.Console.ReadLine();
-                if (!quantity.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                if (!quantity.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                 {
-                    isValidQty = int.TryParse(quantity, out _);
+                    isValidQty = int.TryParse(quantity, out _) && Convert.ToInt32(quantity) != 0;
                     if (!isValidQty)
                     {
                         Console.WriteLine("Invalid quantity input. Please try again.");
                     }
                 }
-                if (quantity.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                if (quantity.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                 {
-                    return GetQuitValue();
+                    return StaticData.quitValue;
                 }
             }
             return System.Convert.ToInt32(quantity);
@@ -428,9 +400,9 @@ namespace Ecommerce.Services.ProductServices
         public string GetProductCategories()
         {
             int count = ProductCategories.Count;
-            for (int index = 0; index < count; index++)
+            for (int categoryIndex = 0; categoryIndex < count; categoryIndex++)
             {
-                System.Console.WriteLine($"{index} : {ProductCategories[index]}");
+                System.Console.WriteLine($"{categoryIndex} : {ProductCategories[categoryIndex]}");
             }
             System.Console.WriteLine($"{count} : Add new category");
 
@@ -439,9 +411,9 @@ namespace Ecommerce.Services.ProductServices
                 System.Console.WriteLine("Enter choice or type 'quit' to exit:");
                 string userChoice = System.Console.ReadLine();
 
-                if (userChoice.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                if (userChoice.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                 {
-                    return quit;
+                    return StaticData.quit;
                 }
 
                 if (int.TryParse(userChoice, out int choice) && choice >= 0 && choice <= count)
@@ -469,9 +441,9 @@ namespace Ecommerce.Services.ProductServices
                 if (ProductCategories.Any(s => s.Equals(name, StringComparison.OrdinalIgnoreCase)))
                 {
                     System.Console.WriteLine("Category name already exists, enter a new category or type 'quit' to exit:");
-                    if (System.Console.ReadLine().Equals(quit, StringComparison.OrdinalIgnoreCase))
+                    if (System.Console.ReadLine().Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                     {
-                        return quit;
+                        return  StaticData.quit;
                     }
                     continue;
                 }
@@ -480,10 +452,6 @@ namespace Ecommerce.Services.ProductServices
                 CategoryManager.SaveCategoriesToFile(ProductCategories);
                 return name;
             }
-        }
-        public int GetQuitValue()
-        {
-            return -1;
         }
     }
 }

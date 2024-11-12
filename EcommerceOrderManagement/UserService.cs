@@ -12,11 +12,11 @@ namespace Ecommerce.Services.UserServices
     public class UserService
     {
         private readonly Repository<User> _userRepository;
-        public const string quit = "quit";
 
-        public UserService(Repository<User> userRepository)
+        public UserService(Repository<User> userRepository, ref int userIdCounter)
         {
             _userRepository = userRepository;
+            userIdCounter = userRepository.CountItems() + 1;
         }
 
         public void Add(User user)
@@ -120,7 +120,7 @@ namespace Ecommerce.Services.UserServices
                     newUserName = System.Console.ReadLine();
                 }
             }
-            if (newUserName.Equals(quit, StringComparison.OrdinalIgnoreCase))
+            if (newUserName.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -142,12 +142,12 @@ namespace Ecommerce.Services.UserServices
         {
             System.Console.WriteLine("Enter User role : admin or customer or \"quit\" to exit");
             string newUserRole = System.Console.ReadLine();
-            while (string.IsNullOrWhiteSpace(newUserRole) || !(newUserRole.Equals("Customer", StringComparison.OrdinalIgnoreCase) || newUserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase) || newUserRole.Equals(quit, StringComparison.OrdinalIgnoreCase)))
+            while (string.IsNullOrWhiteSpace(newUserRole) || !(newUserRole.Equals("Customer", StringComparison.OrdinalIgnoreCase) || newUserRole.Equals("Admin", StringComparison.OrdinalIgnoreCase) || newUserRole.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase)))
             {
                 System.Console.WriteLine(" Please enter valid user role");
                 newUserRole = System.Console.ReadLine();
             }
-            if (newUserRole.Equals(quit, StringComparison.OrdinalIgnoreCase))
+            if (newUserRole.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -158,7 +158,7 @@ namespace Ecommerce.Services.UserServices
         {
             System.Console.WriteLine("Enter User Email or \"quit\" to exit");
             string newUserEmail = System.Console.ReadLine();
-            if (newUserEmail.Equals(quit, StringComparison.OrdinalIgnoreCase))
+            if (newUserEmail.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }

@@ -11,8 +11,7 @@ namespace Ecommerce
 {
     public class EcommerceOrderManagementSystem
     {
-        public static int productIdCounter = 1,UserIdCounter=1;
-        public const string quit = "quit";
+        //public static int productIdCounter = 1;
         private static void OnOrderProcessed(object sender, OrderProcessedEventArgs e)
         {
             Console.WriteLine($"Notification: Order {e.Order.OrderId} has been processed successfully!");
@@ -56,9 +55,9 @@ namespace Ecommerce
                 var serviceProvider = new ServiceCollection()
                     .AddTransient<Product>()
                     .BuildServiceProvider();
-                var productService = new ProductService(productRepository, serviceProvider);
-                var orderService = new OrderService(orderRepository);
-                var userService = new UserService(userRepository);
+                var productService = new ProductService(productRepository, serviceProvider,ref StaticData.productIdCounter);
+                var orderService = new OrderService(orderRepository, ref StaticData.orderIdCounter);
+                var userService = new UserService(userRepository, ref StaticData.UserIdCounter);
                 orderService.OrderProcessed += OnOrderProcessed;
                 UserFactory userFactory = new UserFactory();
                 int currentUserLoggedInId = 0;
@@ -93,7 +92,7 @@ namespace Ecommerce
                             int c2 = NavigateMenu("Register new user");
                             if (c2 != 1) { break; }
                             System.Console.WriteLine("Registering new user");
-                            userService.RegisterNewUser(userFactory, ref UserIdCounter);
+                            userService.RegisterNewUser(userFactory, ref StaticData.UserIdCounter);
                             break;
                         case 3:
                             Environment.Exit(1);
@@ -232,7 +231,7 @@ namespace Ecommerce
                                 if (c1 != 1) { break; }
                                 Console.Clear();
                                 System.Console.WriteLine("To quit at any point enter \"quit\" to exit");
-                                productService.Add(ref productIdCounter, serviceProvider);   
+                                productService.Add(ref StaticData.productIdCounter, serviceProvider);   
                                 break;
                             case 2:
                                 Console.Clear();
@@ -364,8 +363,8 @@ namespace Ecommerce
                     System.Console.WriteLine("Login : Enter your user name or \"quit\" to exit");
                     try
                     {
-                        userName = GetUserNameInput("UserName cannot be null or empty, Please enter again", quit);
-                        if (userName.Equals(quit, StringComparison.OrdinalIgnoreCase))
+                        userName = GetUserNameInput("UserName cannot be null or empty, Please enter again", StaticData.quit);
+                        if (userName.Equals(StaticData.quit, StringComparison.OrdinalIgnoreCase))
                         {
                             return;
                         }

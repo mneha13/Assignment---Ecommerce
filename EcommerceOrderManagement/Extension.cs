@@ -19,15 +19,7 @@ namespace Ecommerce
             {
                 return false;
             }
-            try
-            {
-                return EmailRegex.IsMatch(email);
-            }
-            catch (Exception ex) 
-            {
-                System.Console.WriteLine(ex.Message);
-                return false;
-            }
+            return EmailRegex.IsMatch(email);
         }
     }
 }

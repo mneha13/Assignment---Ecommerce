@@ -10,14 +10,9 @@ namespace Ecommerce
 {
     public class PaginatedData
     {
-        public static int GetPageSize()
-        {
-            int defaultPageSize = 3;  // Default value
-            return defaultPageSize;
-        }
         public static void Paginate<T>(List<T> items)
         {
-            int pageSize = GetPageSize();
+            int pageSize = StaticData.defaultPageSize;
             if (pageSize <= 0)
             {
                 Console.WriteLine("Page size must be greater than zero.");

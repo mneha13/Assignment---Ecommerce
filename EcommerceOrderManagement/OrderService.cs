@@ -21,35 +21,15 @@ namespace Ecommerce.Services.OrderServices
         private readonly Repository<Order> _orderRepository;
         public delegate void OrderProcessedEventHandler(object sender, OrderProcessedEventArgs e);
         public event OrderProcessedEventHandler OrderProcessed;
-        private static int _orderIdCounter = 1;
 
-        public OrderService(Repository<Order> orderRepository)
+        public OrderService(Repository<Order> orderRepository, ref int orderIdCounter)
         {
             _orderRepository = orderRepository;
+            orderIdCounter = orderRepository.CountItems() + 1;
         }
         public void Add(Order order)
         {
             _orderRepository.Add(order);
-        }
-        public int IsValidUserChoice(int startRange, int endRange)
-        {
-            bool isValidInput = false, isValidRange = false;
-            string userChoice = "";
-            while (!isValidInput || !isValidRange)
-            {
-                System.Console.WriteLine("Enter  choice");
-                userChoice = System.Console.ReadLine();
-                isValidInput = int.TryParse(userChoice, out _);
-                if (isValidInput)
-                {
-                    isValidRange = System.Convert.ToInt32(userChoice) >= startRange && System.Convert.ToInt32(userChoice) <= endRange;
-                }
-                if (!isValidInput || !isValidRange)
-                {
-                    Console.WriteLine("Invalid choice input. Please try again.");
-                }
-            }
-            return System.Convert.ToInt32(userChoice);
         }
 
         public void DisplayAllOrders()
@@ -60,7 +40,7 @@ namespace Ecommerce.Services.OrderServices
                     2 : View all orders
                     3 : Exit
            """);
-           int choice = IsValidUserChoice(1, 3);
+           int choice = StaticData.IsValidUserChoice(1, 3);
            if (choice == 3) return;
            var orders = _orderRepository.GetAll().ToList();
            if (choice == 1)
@@ -76,7 +56,7 @@ namespace Ecommerce.Services.OrderServices
            }
            else
            {
-               PaginatedData.Paginate(_orderRepository.GetAll().ToList());
+               PaginatedData.Paginate(orders);
            }
         }
 
@@ -88,12 +68,12 @@ namespace Ecommerce.Services.OrderServices
             {
                 System.Console.WriteLine("Enter product quantity: ");
                 quantity = System.Console.ReadLine();
-                isValidQty = int.TryParse(quantity, out _);
+                isValidQty = int.TryParse(quantity, out _) && Convert.ToInt32(quantity) != 0; 
                 if (isValidQty)
                 {
                     isAvailableQty = System.Convert.ToInt32(quantity) <= productService.GetQuantity(name);
                 }
-                if (!isValidQty)
+                else
                 {
                     Console.WriteLine("Invalid quantity input. Please try again.");
                 }
@@ -108,7 +88,7 @@ namespace Ecommerce.Services.OrderServices
         public async Task<int> PlaceOrderAsync(ProductService productService,string name,int id , Address address,int qty)
         {
             await Task.Delay(2000);
-            int orderId = _orderIdCounter++;
+            int orderId = StaticData.orderIdCounter++;
             Order order = new Order()
             {
                 OrderId = orderId ,
@@ -138,7 +118,7 @@ namespace Ecommerce.Services.OrderServices
               System.Console.WriteLine($"{product.ProductID} : {product.ProductName}");  
             }
             System.Console.WriteLine($"{products.Count()+1} : To Go Back (Exit)");
-            int choice = IsValidUserChoice(1, products.Count() + 1);
+            int choice = StaticData.IsValidUserChoice(1, products.Count() + 1);
             if(choice == products.Count() + 1)
             {
                return;
@@ -225,7 +205,7 @@ namespace Ecommerce.Services.OrderServices
                     index++;
                 }
                 System.Console.WriteLine($"{user.addresses.Count()}:Add new address");
-                int choice = IsValidUserChoice(0,user.addresses.Count());
+                int choice = StaticData.IsValidUserChoice(0,user.addresses.Count());
                 if (choice == user.addresses.Count())
                 {
                     newAddress = customerNewAddress(street, city, zipcode);
@@ -264,7 +244,7 @@ namespace Ecommerce.Services.OrderServices
                     index++;
                 }
                 System.Console.WriteLine($"{orders.Count()} : To Go Back (Exit)");
-                int choice = IsValidUserChoice(0,orders.Count());
+                int choice = StaticData.IsValidUserChoice(0,orders.Count());
                 if (choice != orders.Count())
                 {
                     Order orderInfo = new Order();
@@ -304,7 +284,7 @@ namespace Ecommerce.Services.OrderServices
                     3 : View all
                     4 : Exit
                     """);
-                int choice = IsValidUserChoice(1, 4);
+                int choice = StaticData.IsValidUserChoice(1, 4);
                 switch (choice) 
                 { 
                     case 1:
@@ -371,7 +351,7 @@ namespace Ecommerce.Services.OrderServices
                index++;
             }
             System.Console.WriteLine($"{orders.Count()} : To Go Back (Exit)");
-            int choice = IsValidUserChoice(0, orders.Count());
+            int choice = StaticData.IsValidUserChoice(0, orders.Count());
             if (choice == orders.Count)
             { 
                 return; 
@@ -380,7 +360,7 @@ namespace Ecommerce.Services.OrderServices
             var cancelOrder = orders[choice];
             productService.UpdateProductQty(cancelOrder.Quantity, cancelOrder.ProductName);
             cancelOrder.Status = OrderStatus.Cancelled;
-            System.Console.WriteLine("Order Canceleld");  
+            System.Console.WriteLine("Order Cancelled");  
         }
 
         public void UpdateOrderStatus()
@@ -398,7 +378,7 @@ namespace Ecommerce.Services.OrderServices
                index++;
             }
             System.Console.WriteLine($"{orders.Count()} : To Go Back (Exit) ");
-            int choice = IsValidUserChoice(0,orders.Count());
+            int choice = StaticData.IsValidUserChoice(0,orders.Count());
             if (choice == orders.Count)
             {
                 return;
@@ -415,7 +395,7 @@ namespace Ecommerce.Services.OrderServices
                         4:Cancelled
                         5: Exit
                """);
-               int choice2 = IsValidUserChoice(0, 5);
+               int choice2 = StaticData.IsValidUserChoice(0, 5);
                OrderStatus status;
                switch (choice2)
                {

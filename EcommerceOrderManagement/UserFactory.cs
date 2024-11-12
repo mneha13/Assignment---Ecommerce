@@ -11,15 +11,13 @@ namespace Ecommerce
 {
     public  class UserFactory
     {
-        public const string customer = "customer";
-        public const string admin = "admin";
         public User? GetUser(String role , String name , int id,String email,String password)
         {
             var normalizedRole = role?.Trim().ToLower();
             return normalizedRole switch
             {
-                customer => CreateUser<Customer>(id, name, email, password, Role.CUSTOMER),
-                admin => CreateUser<Admin>(id, name, email, password, Role.ADMIN),
+                StaticData.customer => CreateUser<Customer>(id, name, email, password, Role.CUSTOMER),
+                StaticData.admin => CreateUser<Admin>(id, name, email, password, Role.ADMIN),
                 _ => null,
             };
         }

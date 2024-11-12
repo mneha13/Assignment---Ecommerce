@@ -8,13 +8,11 @@ namespace Ecommerce
 {
     public static class Logger
     {
-        private static readonly string logFilePath = "app.log";
-
         static Logger()
         {
-            if (!File.Exists(logFilePath))
+            if (!File.Exists(StaticData.logFilePath))
             {
-                File.Create(logFilePath).Dispose();
+                File.Create(StaticData.logFilePath).Dispose();
             }
         }
 
@@ -38,7 +36,7 @@ namespace Ecommerce
         private static void Log(string logLevel, string message)
         {
             var logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}";
-            File.AppendAllText(logFilePath, logEntry + Environment.NewLine);
+            File.AppendAllText(StaticData.logFilePath, logEntry + Environment.NewLine);
         }
     }
 }
