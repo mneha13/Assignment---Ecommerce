@@ -11,7 +11,6 @@ namespace Ecommerce
 {
     public class EcommerceOrderManagementSystem
     {
-        //public static int productIdCounter = 1;
         private static void OnOrderProcessed(object sender, OrderProcessedEventArgs e)
         {
             Console.WriteLine($"Notification: Order {e.Order.OrderId} has been processed successfully!");
